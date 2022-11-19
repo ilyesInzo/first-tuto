@@ -1,28 +1,31 @@
-import { Controller, Get, Param, Post, Req } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Req } from "@nestjs/common";
 import { Request } from "express";
 import { UserService } from "./user.service";
+import { UserView } from "./_models/user.model";
 
-@Controller('/user')
+@Controller('/users')
 export class UserController {
 
     constructor(private readonly userService: UserService) { }
 
-    @Get("")
+    @Get()
     getUsers() {
-        return this.userService.getUsers();
+        return this.userService.getAll();
     }
 
-    @Get("/:userid")
-    getUser(@Param() userId: number) {
-        return {
-            name: "laslous",
-            email: "hallo@gmail.com",
-        };
+    @Get("/:id")
+    async getUser(@Param() id: number): Promise<UserView> {
+        return await this.userService.getOne(id);
     }
 
     @Post()
-    saveUser(@Req() req: Request) {
-        return req;
+    saveUser(@Body() userView: UserView) {
+        return this.userService.create(userView);
+    }
+
+    @Patch('/:id')
+    updateUser(@Param('id', ParseIntPipe) id: number, @Body() userView: UserView) {
+        return this.userService.update(userView, id);
     }
 
 }
